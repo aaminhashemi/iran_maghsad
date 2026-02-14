@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/strings.dart';
 import '../providers/form_provider.dart';
 import '../widgets/personal_info_step.dart';
 import '../widgets/address_step.dart';
@@ -31,10 +32,10 @@ class _MultiStepFormContent extends StatelessWidget {
 
     // لیست مراحل
     final steps = [
-      {'title': 'اطلاعات شخصی', 'icon': Icons.person},
-      {'title': 'آدرس', 'icon': Icons.location_on},
-      {'title': 'اطلاعات شغلی', 'icon': Icons.work},
-      {'title': 'تنظیمات', 'icon': Icons.settings},
+      {'title': Strings.getPersonalInfo(langCode), 'icon': Icons.person},
+      {'title': Strings.getAddress(langCode), 'icon': Icons.location_on},
+      {'title': Strings.getJobInfo(langCode), 'icon': Icons.work},
+      {'title': Strings.getSettings(langCode), 'icon': Icons.settings},
     ];
 
     // ویجت‌های هر مرحله
@@ -47,7 +48,7 @@ class _MultiStepFormContent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('فرم ثبت‌نام چند مرحله‌ای'),
+        title: Text(Strings.getFormTitle(langCode)),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -103,6 +104,7 @@ class _MultiStepFormContent extends StatelessWidget {
                             fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                             color: isActive ? Colors.black : Colors.grey,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -138,7 +140,7 @@ class _MultiStepFormContent extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: formProvider.previousStep,
                       icon: const Icon(Icons.arrow_back),
-                      label: const Text('مرحله قبل'),
+                      label: Text(Strings.getPrevious(langCode)),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: Colors.grey.shade400),
@@ -149,26 +151,20 @@ class _MultiStepFormContent extends StatelessWidget {
                 if (!formProvider.isFirstStep) const SizedBox(width: 16),
 
                 // دکمه بعدی/ارسال
-                // توی build روش، قسمت دکمه بعدی/ارسال رو اینجوری اصلاح کن:
-
                 Expanded(
                   child: formProvider.isSubmitting
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton.icon(
                     onPressed: () async {
-                      // اعتبارسنجی مرحله فعلی
                       if (formProvider.validateCurrentStep()) {
-                        // ذخیره داده‌های مرحله فعلی
                         formProvider.saveCurrentForm();
 
                         if (formProvider.isLastStep) {
-                          // ارسال نهایی
                           bool success = await formProvider.submitForm();
                           if (success && context.mounted) {
-                            _showSuccessDialog(context);
+                            _showSuccessDialog(context, langCode);
                           }
                         } else {
-                          // رفتن به مرحله بعد
                           formProvider.nextStep();
                         }
                       }
@@ -177,7 +173,9 @@ class _MultiStepFormContent extends StatelessWidget {
                       formProvider.isLastStep ? Icons.send : Icons.arrow_forward,
                     ),
                     label: Text(
-                      formProvider.isLastStep ? 'ارسال' : 'مرحله بعد',
+                      formProvider.isLastStep
+                          ? Strings.getSubmit(langCode)
+                          : Strings.getNext(langCode),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -194,33 +192,36 @@ class _MultiStepFormContent extends StatelessWidget {
     );
   }
 
-  void _showSuccessDialog(BuildContext context) {
+  void _showSuccessDialog(BuildContext context, String langCode) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'ارسال با موفقیت انجام شد!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Strings.getSuccessTitle(langCode),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
-              Text('اطلاعات شما با موفقیت ثبت شد.'),
+              const SizedBox(height: 8),
+              Text(
+                Strings.getSuccessMessage(langCode),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // ریست فرم و بازگشت به صفحه اصلی
                 Provider.of<FormProvider>(context, listen: false).resetForm();
                 context.go('/home');
               },
-              child: const Text('باشه'),
+              child: Text(Strings.getOk(langCode)),
             ),
           ],
         );

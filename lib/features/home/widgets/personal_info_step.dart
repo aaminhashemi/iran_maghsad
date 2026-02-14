@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/form_provider.dart';
+import '../../../core/localization/strings.dart';
 
 class PersonalInfoStep extends StatelessWidget {
   final String langCode;
@@ -16,8 +17,8 @@ class PersonalInfoStep extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: formProvider.personalInfoFormKey, // کلید فرم برای اعتبارسنجی
-          autovalidateMode: AutovalidateMode.onUserInteraction, // اعتبارسنجی هنگام تایپ
+          key: formProvider.personalInfoFormKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -43,7 +44,7 @@ class PersonalInfoStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.fullName,
                 decoration: InputDecoration(
-                  labelText: 'نام و نام خانوادگی',
+                  labelText: Strings.getFullName(langCode),
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -57,10 +58,10 @@ class PersonalInfoStep extends StatelessWidget {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'این فیلد اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getFullName(langCode));
                   }
                   if (value.length < 3) {
-                    return 'حداقل ۳ کاراکتر وارد کنید';
+                    return Strings.getMinLength(langCode, Strings.getFullName(langCode), 3);
                   }
                   return null;
                 },
@@ -72,7 +73,7 @@ class PersonalInfoStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.email,
                 decoration: InputDecoration(
-                  labelText: 'ایمیل',
+                  labelText: Strings.getEmail(langCode),
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -84,10 +85,10 @@ class PersonalInfoStep extends StatelessWidget {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'ایمیل اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getEmail(langCode));
                   }
                   if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'ایمیل معتبر نیست';
+                    return Strings.getInvalidEmail(langCode);
                   }
                   return null;
                 },
@@ -99,7 +100,7 @@ class PersonalInfoStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.phone,
                 decoration: InputDecoration(
-                  labelText: 'شماره موبایل',
+                  labelText: Strings.getPhone(langCode),
                   prefixIcon: const Icon(Icons.phone_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -111,13 +112,13 @@ class PersonalInfoStep extends StatelessWidget {
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'شماره موبایل اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getPhone(langCode));
                   }
                   if (value.length != 11) {
-                    return 'شماره موبایل باید ۱۱ رقم باشد';
+                    return Strings.getPhoneLength(langCode);
                   }
                   if (!RegExp(r'^09[0-9]{9}$').hasMatch(value)) {
-                    return 'شماره موبایل معتبر نیست (مثال: 09123456789)';
+                    return Strings.getInvalidPhone(langCode);
                   }
                   return null;
                 },

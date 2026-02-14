@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/form_provider.dart';
+import '../../../core/localization/strings.dart';
 
 class AddressStep extends StatelessWidget {
   final String langCode;
@@ -43,7 +44,7 @@ class AddressStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.address,
                 decoration: InputDecoration(
-                  labelText: 'آدرس',
+                  labelText: Strings.getAddress(langCode),
                   prefixIcon: const Icon(Icons.home_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -58,10 +59,10 @@ class AddressStep extends StatelessWidget {
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'آدرس اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getAddress(langCode));
                   }
                   if (value.length < 10) {
-                    return 'آدرس باید حداقل ۱۰ کاراکتر باشد';
+                    return Strings.getMinLength(langCode, Strings.getAddress(langCode), 10);
                   }
                   return null;
                 },
@@ -73,7 +74,7 @@ class AddressStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.city,
                 decoration: InputDecoration(
-                  labelText: 'شهر',
+                  labelText: Strings.getCity(langCode),
                   prefixIcon: const Icon(Icons.location_city),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -84,10 +85,10 @@ class AddressStep extends StatelessWidget {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'نام شهر اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getCity(langCode));
                   }
                   if (value.length < 2) {
-                    return 'نام شهر معتبر نیست';
+                    return Strings.getMinLength(langCode, Strings.getCity(langCode), 2);
                   }
                   return null;
                 },
@@ -99,7 +100,7 @@ class AddressStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.postalCode,
                 decoration: InputDecoration(
-                  labelText: 'کد پستی',
+                  labelText: Strings.getPostalCode(langCode),
                   prefixIcon: const Icon(Icons.markunread_mailbox),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -111,13 +112,13 @@ class AddressStep extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'کد پستی اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getPostalCode(langCode));
                   }
                   if (value.length != 10) {
-                    return 'کد پستی باید ۱۰ رقم باشد';
+                    return Strings.getPostalCodeLength(langCode);
                   }
                   if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-                    return 'کد پستی باید فقط عدد باشد';
+                    return Strings.getPostalCodeDigits(langCode);
                   }
                   return null;
                 },

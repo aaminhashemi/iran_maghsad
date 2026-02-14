@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/form_provider.dart';
+import '../../../core/localization/strings.dart';
 
 class SettingsStep extends StatelessWidget {
   final String langCode;
@@ -50,23 +51,23 @@ class SettingsStep extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'خلاصه اطلاعات',
-                        style: TextStyle(
+                      Text(
+                        Strings.getSummary(langCode),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const Divider(),
-                      _buildSummaryRow('نام:', data.fullName.isEmpty ? '---' : data.fullName),
-                      _buildSummaryRow('ایمیل:', data.email.isEmpty ? '---' : data.email),
-                      _buildSummaryRow('موبایل:', data.phone.isEmpty ? '---' : data.phone),
-                      _buildSummaryRow('آدرس:', data.address.isEmpty ? '---' : data.address),
-                      _buildSummaryRow('شهر:', data.city.isEmpty ? '---' : data.city),
-                      _buildSummaryRow('کد پستی:', data.postalCode.isEmpty ? '---' : data.postalCode),
-                      _buildSummaryRow('شغل:', data.jobTitle.isEmpty ? '---' : data.jobTitle),
-                      _buildSummaryRow('شرکت:', data.company.isEmpty ? '---' : data.company),
-                      _buildSummaryRow('سابقه:', '${data.experience} سال'),
+                      _buildSummaryRow('${Strings.getFullName(langCode)}:', data.fullName),
+                      _buildSummaryRow('${Strings.getEmail(langCode)}:', data.email),
+                      _buildSummaryRow('${Strings.getPhone(langCode)}:', data.phone),
+                      _buildSummaryRow('${Strings.getAddress(langCode)}:', data.address),
+                      _buildSummaryRow('${Strings.getCity(langCode)}:', data.city),
+                      _buildSummaryRow('${Strings.getPostalCode(langCode)}:', data.postalCode),
+                      _buildSummaryRow('${Strings.getJobTitle(langCode)}:', data.jobTitle),
+                      _buildSummaryRow('${Strings.getCompany(langCode)}:', data.company),
+                      _buildSummaryRow('${Strings.getExperience(langCode)}:', '${data.experience} ${Strings.getYears(langCode)}'),
                     ],
                   ),
                 ),
@@ -75,7 +76,7 @@ class SettingsStep extends StatelessWidget {
 
               // عضویت در خبرنامه
               CheckboxListTile(
-                title: const Text('عضویت در خبرنامه'),
+                title: Text(Strings.getNewsletter(langCode)),
                 value: data.newsletter,
                 onChanged: (value) {
                   formProvider.updateField('newsletter', value);
@@ -86,14 +87,13 @@ class SettingsStep extends StatelessWidget {
 
               // پذیرش قوانین
               CheckboxListTile(
-                title: const Text(
-                  'قوانین و مقررات را می‌پذیرم',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                title: Text(
+                  Strings.getTerms(langCode),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 value: data.termsAccepted,
                 onChanged: (value) {
                   formProvider.updateField('termsAccepted', value);
-                  // برای اعتبارسنجی، فرم رو آپدیت می‌کنیم
                   formProvider.settingsFormKey.currentState?.validate();
                 },
                 secondary: const Icon(Icons.description_outlined),
@@ -105,7 +105,7 @@ class SettingsStep extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, right: 16),
                   child: Text(
-                    'برای ادامه باید قوانین را بپذیرید',
+                    Strings.getTermsRequired(langCode),
                     style: TextStyle(
                       color: Colors.red.shade700,
                       fontSize: 12,
@@ -117,13 +117,12 @@ class SettingsStep extends StatelessWidget {
               const SizedBox(height: 20),
 
               // TextFormField مخفی برای اعتبارسنجی چک‌باکس
-              // این فیلد نمایش داده نمی‌شه ولی validator آن اجرا میشه
               Offstage(
                 offstage: true,
                 child: TextFormField(
                   validator: (value) {
                     if (!data.termsAccepted) {
-                      return 'خطا';
+                      return Strings.getTermsRequired(langCode);
                     }
                     return null;
                   },
@@ -143,7 +142,7 @@ class SettingsStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
+            width: 100,
             child: Text(
               label,
               style: const TextStyle(
@@ -154,7 +153,7 @@ class SettingsStep extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value,
+              value.isEmpty ? '---' : value,
               style: const TextStyle(fontSize: 16),
             ),
           ),

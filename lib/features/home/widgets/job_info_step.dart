@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/form_provider.dart';
+import '../../../core/localization/strings.dart';
 
 class JobInfoStep extends StatelessWidget {
   final String langCode;
@@ -43,7 +44,7 @@ class JobInfoStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.jobTitle,
                 decoration: InputDecoration(
-                  labelText: 'عنوان شغلی',
+                  labelText: Strings.getJobTitle(langCode),
                   prefixIcon: const Icon(Icons.badge_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -57,10 +58,10 @@ class JobInfoStep extends StatelessWidget {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'عنوان شغلی اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getJobTitle(langCode));
                   }
                   if (value.length < 3) {
-                    return 'عنوان شغلی باید حداقل ۳ کاراکتر باشد';
+                    return Strings.getMinLength(langCode, Strings.getJobTitle(langCode), 3);
                   }
                   return null;
                 },
@@ -72,7 +73,7 @@ class JobInfoStep extends StatelessWidget {
               TextFormField(
                 initialValue: data.company,
                 decoration: InputDecoration(
-                  labelText: 'نام شرکت',
+                  labelText: Strings.getCompany(langCode),
                   prefixIcon: const Icon(Icons.business),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -83,7 +84,7 @@ class JobInfoStep extends StatelessWidget {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'نام شرکت اجباری است';
+                    return Strings.getFieldRequired(langCode, Strings.getCompany(langCode));
                   }
                   return null;
                 },
@@ -93,7 +94,7 @@ class JobInfoStep extends StatelessWidget {
 
               // سابقه کار
               Text(
-                'سابقه کار: ${data.experience} سال',
+                '${Strings.getExperience(langCode)}: ${data.experience} ${Strings.getYears(langCode)}',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Slider(
@@ -101,18 +102,18 @@ class JobInfoStep extends StatelessWidget {
                 min: 0,
                 max: 50,
                 divisions: 50,
-                label: '${data.experience} سال',
+                label: '${data.experience} ${Strings.getYears(langCode)}',
                 onChanged: (value) {
                   formProvider.updateField('experience', value.toInt());
                 },
               ),
 
-              // نمایش خطا برای سابقه کار (اگر خارج از محدوده باشه)
+              // نمایش خطا برای سابقه کار
               if (data.experience < 0 || data.experience > 50)
                 Padding(
                   padding: const EdgeInsets.only(top: 8, right: 16),
                   child: Text(
-                    'سابقه کار باید بین ۰ تا ۵۰ سال باشد',
+                    Strings.getExperienceRange(langCode),
                     style: TextStyle(
                       color: Colors.red.shade700,
                       fontSize: 12,
