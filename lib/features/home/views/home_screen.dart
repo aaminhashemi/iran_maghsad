@@ -107,12 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // اقدام سریع
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
