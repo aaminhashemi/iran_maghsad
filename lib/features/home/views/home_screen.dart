@@ -90,9 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: 'خانه',
           ),
           BottomNavigationBarItem(
@@ -270,6 +270,28 @@ class HomeTab extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // دکمه فرم ثبت‌نام - اینو درست کردم
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  context.go('/form');
+                },
+                icon: const Icon(Icons.note_add),
+                label: const Text('فرم ثبت‌نام'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ),
