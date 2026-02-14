@@ -1,60 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/strings.dart';
+import '../../../core/widgets/language_selector.dart';
 
-// Provider برای مدیریت داده‌های صفحه اصلی
-final homeDataProvider = FutureProvider<List<String>>((ref) async {
-  // شبیه‌سازی دریافت داده از API یا دیتابیس
-  await Future.delayed(const Duration(seconds: 1));
-  return [
-    'آیتم شماره ۱',
-    'آیتم شماره ۲',
-    'آیتم شماره ۳',
-    'آیتم شماره ۴',
-    'آیتم شماره ۵',
-  ];
-});
-
-class HomeScreen extends ConsumerStatefulWidget {
+// مدل ساده برای آیتم‌ها
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  List<String> _items = []; // لیست آیتم‌ها
+  bool _isLoading = true; // وضعیت لودینگ
 
-  // لیست صفحه‌های مختلف برای BottomNavigationBar
-  final List<Widget> _pages = [
-    const HomeTab(),
-    const SearchTab(),
-    const ProfileTab(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems(); // لود آیتم‌ها هنگام شروع
+  }
+
+  // شبیه‌سازی دریافت داده
+  Future<void> _loadItems() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    setState(() {
+      _items = ['آیتم شماره ۱', 'آیتم شماره ۲', 'آیتم شماره ۳', 'آیتم شماره ۴', 'آیتم شماره ۵'];
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.watch<LocaleProvider>().locale;
+    final langCode = locale.languageCode;
+
+    _pages = [
+      HomeTab(
+        langCode: langCode,
+        items: _items,
+        isLoading: _isLoading,
+        onRefresh: _loadItems,
+      ),
+      SearchTab(langCode: langCode),
+      ProfileTab(langCode: langCode),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'صفحه اصلی',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        actions: [
+        actions: const [
+          LanguageSelector(),
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // رفتن به صفحه نوتیفیکیشن
-            },
+            icon: Icon(Icons.notifications_outlined),
+            onPressed: null, // فعلاً غیرفعال
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // رفتن به صفحه تنظیمات
-            },
+            icon: Icon(Icons.settings_outlined),
+            onPressed: null, // فعلاً غیرفعال
           ),
         ],
       ),
@@ -69,21 +89,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
             label: 'خانه',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: 'جستجو',
+            icon: const Icon(Icons.search_outlined),
+            activeIcon: const Icon(Icons.search),
+            label: Strings.getSearch(langCode),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: 'پروفایل',
+            icon: const Icon(Icons.person_outlined),
+            activeIcon: const Icon(Icons.person),
+            label: Strings.getProfile(langCode),
           ),
         ],
       ),
@@ -98,20 +118,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 // تب خانه
-class HomeTab extends ConsumerWidget {
-  const HomeTab({super.key});
+class HomeTab extends StatelessWidget {
+  final String langCode;
+  final List<String> items;
+  final bool isLoading;
+  final VoidCallback onRefresh;
+
+  const HomeTab({
+    super.key,
+    required this.langCode,
+    required this.items,
+    required this.isLoading,
+    required this.onRefresh,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemsAsync = ref.watch(homeDataProvider);
-
+  Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        // برای آپدیت دستی صفحه
-        ref.invalidate(homeDataProvider);
+        onRefresh();
       },
       child: CustomScrollView(
         slivers: [
+          // بنر جدید
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade400, Colors.pink.shade400],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.local_offer,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          Strings.getSpecialOffer(langCode),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    Strings.getOfferText(langCode),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    Strings.getOfferEnd(langCode),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.purple,
+                    ),
+                    child: Text(Strings.getViewProducts(langCode)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // هدر خوش‌آمدگویی
           SliverToBoxAdapter(
             child: Container(
@@ -125,8 +232,8 @@ class HomeTab extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'خوش آمدید!',
-                    style: TextStyle(
+                    Strings.getWelcome(langCode),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -134,7 +241,7 @@ class HomeTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'به اپلیکیشن ما خوش آمدید. امروز چه کمکی می‌تونیم بکنیم؟',
+                    Strings.getWelcomeMessage(langCode),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 14,
@@ -153,7 +260,7 @@ class HomeTab extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      'بازدیدها',
+                      Strings.getVisits(langCode),
                       '۱,۲۳۴',
                       Icons.visibility,
                       Colors.orange,
@@ -162,7 +269,7 @@ class HomeTab extends ConsumerWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildStatCard(
-                      'کاربران',
+                      Strings.getUsers(langCode),
                       '۸۹۰',
                       Icons.people,
                       Colors.green,
@@ -174,69 +281,47 @@ class HomeTab extends ConsumerWidget {
           ),
 
           // لیست آیتم‌ها
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: itemsAsync.when(
-              data: (items) {
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.blue.shade100,
-                            child: Text('${index + 1}'),
-                          ),
-                          title: Text(items[index]),
-                          subtitle: const Text('توضیحات آیتم'),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () {
-                            // رفتن به صفحه جزئیات
-                          },
+          if (isLoading)
+            const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Text('${index + 1}'),
                         ),
-                      );
-                    },
-                    childCount: items.length,
-                  ),
-                );
-              },
-              error: (error, stack) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 60,
+                        title: Text(items[index]),
+                        subtitle: Text(
+                          langCode == 'fa'
+                              ? 'توضیحات آیتم'
+                              : (langCode == 'ar'
+                              ? 'وصف العنصر'
+                              : 'Item description'),
                         ),
-                        const SizedBox(height: 16),
-                        Text('خطا: $error'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            ref.invalidate(homeDataProvider);
-                          },
-                          child: const Text('تلاش مجدد'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              loading: () {
-                return const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              },
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          // رفتن به صفحه جزئیات
+                        },
+                      ),
+                    );
+                  },
+                  childCount: items.length,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -278,7 +363,8 @@ class HomeTab extends ConsumerWidget {
 
 // تب جستجو
 class SearchTab extends StatelessWidget {
-  const SearchTab({super.key});
+  final String langCode;
+  const SearchTab({super.key, required this.langCode});
 
   @override
   Widget build(BuildContext context) {
@@ -286,18 +372,11 @@ class SearchTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.search, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            'جستجو',
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.grey.shade600,
-            ),
+            Strings.getSearch(langCode),
+            style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -307,7 +386,8 @@ class SearchTab extends StatelessWidget {
 
 // تب پروفایل
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+  final String langCode;
+  const ProfileTab({super.key, required this.langCode});
 
   @override
   Widget build(BuildContext context) {
@@ -318,35 +398,24 @@ class ProfileTab extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.blue.shade100,
-            child: const Icon(
-              Icons.person,
-              size: 50,
-              color: Colors.blue,
-            ),
+            child: const Icon(Icons.person, size: 50, color: Colors.blue),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'کاربر مهمان',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+          Text(
+            Strings.getGuestUser(langCode),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             'guest@example.com',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
-              // رفتن به صفحه ورود
-              Navigator.pushReplacementNamed(context, '/login');
+              context.go('/login');
             },
-            child: const Text('ورود به حساب'),
+            child: Text(Strings.getLogin(langCode)),
           ),
         ],
       ),

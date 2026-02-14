@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';  // این رو اضافه کن
+import 'package:go_router/go_router.dart';  // برای مسیریابی
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -19,8 +18,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   void _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
-      // استفاده از GoRouter به جای Navigator
-      context.go('/home');  // یا context.pushReplacementNamed('/home')
+      // استفاده از GoRouter برای انتقال به صفحه اصلی
+      context.go('/home');
     }
   }
 
